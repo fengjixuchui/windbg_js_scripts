@@ -3,7 +3,9 @@
  * Get the environment variables
  *
  * 0:000> .scriptload \path\to\EnvVars.js
- * 0:000> dx @$env().Where(e => e.Name == "USERNAME")
+ * 0:000> dx @$curprocess.Environment.Variables.Where( var => var.Name.Contains("SYMBOL") )
+ * @$curprocess.Environment.Variables.Where( var => var.Name.Contains("SYMBOL") )
+ *   [0x0]            : _NT_SYMBOL_PATH = srv*C:\Syms*http://msdl.microsoft.com/download/symbols
  *
  */
 
@@ -23,7 +25,7 @@ class EnvironmentVariable
 
     toString()
     {
-        return "(" + this.Address.toString(16) + ") " + this.Name + "=" + this.Value;
+        return `${this.Name} = ${this.Value}`;
     }
 }
 
@@ -46,20 +48,34 @@ function *GetEnvironmentVariables()
             break;
         }
 
+        let Env = undefined;
+
         if (env.indexOf("="))
         {
             let p = env.split("=");
-            var Env = new EnvironmentVariable(addr, p[0], p[1]);
+            Env = new EnvironmentVariable(addr, p[0], p[1]);
         }
         else
         {
-            var Env = new EnvironmentVariable(addr, env, "");
+            Env = new EnvironmentVariable(addr, env, "");
         }
 
-        yield (Env);
+        if(Env !== undefined)
+            yield (Env);
+
         off += (env.length+1)*2;
     }
 }
+
+
+class ModelParent
+{
+    get Variables()
+    {
+        return GetEnvironmentVariables();
+    }
+}
+
 
 
 /**
@@ -68,7 +84,12 @@ function *GetEnvironmentVariables()
 function initializeScript()
 {
     return [
-        new host.functionAlias(GetEnvironmentVariables, "env")
+        new host.apiVersionSupport(1, 3),
+
+        new host.namedModelParent(
+            ModelParent,
+            'Debugger.Models.Process.Environment'
+        ),
     ];
 }
 
