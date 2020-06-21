@@ -258,6 +258,26 @@ interface typeObjectInterface
 declare namespace host {
 
     /**
+     * Returns the address from a symbol.
+     */
+    function getModuleSymbolAddress(module: string, symbolName: string): host.Int64;
+
+    /**
+     * Declare the WinDbg API version
+     */
+    class apiVersionSupport {
+        constructor(major: number, minor: number);
+    }
+
+    /**
+     * Create a new function alias
+     */
+    class functionAlias {
+        constructor(jsFunction: any, aliasName: string);
+    }
+
+
+    /**
      * Creates a new pointer object of the given type at the given address.
      *
      * @param address The address (or location) that the pointer is at
@@ -484,13 +504,13 @@ declare namespace host {
 
 
         /**
-         * Shifts the 64-bit value left by the given amount and returns the result
+         * Arithmetic shift the 64-bit value left by the given amount and returns the result
          */
         bitwiseShiftLeft(value: number) : Int64;
 
 
         /**
-         * Shifts the 64-bit value right by the given amount and returns the result
+         * Arithmetic right shift the 64-bit value right by the given amount and returns the result
          */
         bitwiseShiftRight(value: number) : Int64;
 
